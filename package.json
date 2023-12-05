@@ -1,7 +1,7 @@
 {
   "name": "@coderich/gameflow",
   "main": "index.js",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -14,8 +14,7 @@
     "lint": "eslint ./",
     "dev": "coderich-dev"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "@coderich/dev": "^0.1.0"
   }
