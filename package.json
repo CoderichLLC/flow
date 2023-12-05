@@ -1,0 +1,22 @@
+{
+  "name": "@coderich/flow",
+  "main": "index.js",
+  "version": "0.0.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "src",
+    "!__mocks__"
+  ],
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint ./",
+    "dev": "coderich-dev"
+  },
+  "dependencies": {
+  },
+  "devDependencies": {
+    "@coderich/dev": "^0.1.0"
+  }
+}
