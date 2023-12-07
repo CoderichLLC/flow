@@ -36,7 +36,7 @@ describe('Engine', () => {
 
   describe('Action', () => {
     test('define', () => {
-      Action.define('compete', warmup, run, look, stretch);
+      Action.define('compete', [warmup, run, look, stretch]);
       expect(Action.compete).toBeDefined();
     });
 

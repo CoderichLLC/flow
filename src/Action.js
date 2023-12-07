@@ -71,6 +71,6 @@ module.exports = class Action {
   }
 
   static define(id, ...steps) {
-    return (Action[id] = new Action(id, steps));
+    return (Action[id] = new Action(id, steps.flat()));
   }
 };

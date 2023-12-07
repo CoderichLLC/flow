@@ -52,6 +52,6 @@ module.exports = class Stream {
   }
 
   static define(id, ...thunks) {
-    return (Stream[id] = new Stream(id, thunks));
+    return (Stream[id] = new Stream(id, thunks.flat()));
   }
 };
