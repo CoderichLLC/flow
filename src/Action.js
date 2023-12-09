@@ -14,7 +14,7 @@ module.exports = class Action {
       const listeners = [];
 
       // Internal state
-      let started = false, aborted = false, paused;
+      let started = false, aborted = false, reason, paused;
 
       // The action is a promise that is resolved or rejected
       const { promise, resolve, reject } = withResolvers();
@@ -22,6 +22,7 @@ module.exports = class Action {
       // Method to abort the action
       context.abort = (data) => {
         aborted = true;
+        reason = data;
         reject(new AbortError('Action Aborted', data));
       };
 
@@ -45,10 +46,11 @@ module.exports = class Action {
       }), {
         id: { value: id },
         steps: { value: steps.length },
-        abort: { get() { return reason => context.abort(reason) && this; } },
+        abort: { get() { return data => context.abort(data) && this; } },
         listen: { get() { return listener => listeners.push(listener) && this; } },
         aborted: { get: () => aborted },
         started: { get: () => started },
+        reason: { get: () => reason },
         pause: {
           get() {
             return () => {

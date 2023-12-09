@@ -9,7 +9,7 @@ describe('Engine', () => {
   const run = jest.fn(() => timeout(250).then(() => ({ ran: true })));
   const look = jest.fn(() => ({ looked: true }));
   const stretch = jest.fn(() => timeout(150).then(() => ({ stretched: true })));
-  const abort = jest.fn((data, context) => context.abort());
+  const abort = jest.fn((data, context) => context.abort('monklike'));
 
   // Asserters
   const assertParameters = () => {
@@ -48,12 +48,13 @@ describe('Engine', () => {
 
     test('abort', async () => {
       const promise = Action.compete({ actor: 'you' });
-      promise.abort();
+      promise.abort('selfish');
       const data = await promise;
       await (timeout(500));
       assertAbort();
       expect(data).toBeInstanceOf(AbortError);
       expect(promise.aborted).toBe(true);
+      expect(promise.reason).toBe('selfish');
       expect(promise.started).toBe(false);
     });
 
@@ -64,6 +65,7 @@ describe('Engine', () => {
       expect(abort).toHaveBeenCalled();
       expect(stretch).not.toHaveBeenCalled();
       expect(promise.aborted).toBe(true);
+      expect(promise.reason).toBe('monklike');
       expect(promise.started).toBe(true);
     });
 
