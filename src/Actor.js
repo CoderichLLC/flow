@@ -1,4 +1,4 @@
-const EventEmitter = require('events');
+const EventEmitter = require('./EventEmitter');
 const Action = require('./Action');
 const Stream = require('./Stream');
 
@@ -11,7 +11,7 @@ module.exports = class Actor extends EventEmitter {
   perform(action, data) {
     action = action instanceof Action ? action : Action[action];
     const promise = action(data, { actor: this });
-    this.emit(`pre:${action.id}`, { action, promise, data });
+    this.emit(`pre:${promise.id}`, { action, promise, data });
     promise.listen((i) => { if (i === 0) this.emit(`start:${promise.id}`, { action, promise, data }); });
     promise.then(result => this.emit(`post:${promise.id}`, { action, promise, result }));
     return promise;
