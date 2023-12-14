@@ -30,11 +30,10 @@ module.exports = class Action {
       pipeline(steps.map((step, index) => value => new Promise((res, rej) => {
         setImmediate(async () => {
           if (!aborted) {
-            if (!started) await Promise.all(listeners.map(l => l(0)));
+            if (!started) await Promise.all(listeners.map(l => l(0, context))); // Give a chance to abort before starting
             started = true;
-            Promise.race([promise, step(value, context)]).then((data) => {
-              Promise.all(listeners.map(l => l(index + 1))).then(() => res(data));
-            }).catch(rej);
+            await Promise.all(listeners.map(l => l(index + 1, context))); // Give a chance to abort along with each step
+            Promise.race([promise, step(value, context)]).then(res).catch(rej);
           }
         });
       })), startValue).then(resolve).catch(reject);

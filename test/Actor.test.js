@@ -28,19 +28,19 @@ describe('Actor', () => {
   test('perform', async () => {
     const actor = Actor.player1;
     await actor.perform('compete', { actor: 'me' });
-    expect(warmup).toHaveBeenCalledWith({ actor: 'me' }, { abort: expect.any(Function), actor });
-    expect(run).toHaveBeenCalledWith({ warm: true }, { abort: expect.any(Function), actor });
-    expect(look).toHaveBeenCalledWith({ ran: true }, { abort: expect.any(Function), actor });
-    expect(stretch).toHaveBeenCalledWith({ looked: true }, { abort: expect.any(Function), actor });
+    expect(warmup).toHaveBeenCalledWith({ actor: 'me' }, expect.objectContaining({ abort: expect.any(Function), actor }));
+    expect(run).toHaveBeenCalledWith({ warm: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
+    expect(look).toHaveBeenCalledWith({ ran: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
+    expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
   });
 
   test('stream', async () => {
     const actor = Actor.player1;
     await actor.stream('player1', 'compete', { actor: 'hi' });
-    expect(warmup).toHaveBeenCalledWith({ actor: 'hi' }, { abort: expect.any(Function), actor });
-    expect(run).toHaveBeenCalledWith({ warm: true }, { abort: expect.any(Function), actor });
-    expect(look).toHaveBeenCalledWith({ ran: true }, { abort: expect.any(Function), actor });
-    expect(stretch).toHaveBeenCalledWith({ looked: true }, { abort: expect.any(Function), actor });
+    expect(warmup).toHaveBeenCalledWith({ actor: 'hi' }, expect.objectContaining({ abort: expect.any(Function), actor }));
+    expect(run).toHaveBeenCalledWith({ warm: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
+    expect(look).toHaveBeenCalledWith({ ran: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
+    expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
   });
 
   test('events + follow', (done) => {
@@ -51,8 +51,8 @@ describe('Actor', () => {
       expect(run).toHaveBeenCalledTimes(2);
       expect(look).toHaveBeenCalledTimes(2);
       expect(stretch).toHaveBeenCalledTimes(2);
-      expect(stretch).toHaveBeenCalledWith({ looked: true }, { abort: expect.any(Function), actor });
-      expect(stretch).toHaveBeenCalledWith({ looked: true }, { abort: expect.any(Function), actor: Actor.player1 });
+      expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
+      expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor: Actor.player1 }));
       done();
     });
 

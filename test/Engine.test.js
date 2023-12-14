@@ -13,10 +13,10 @@ describe('Engine', () => {
 
   // Asserters
   const assertParameters = () => {
-    expect(warmup).toHaveBeenCalledWith({ actor: 'me' }, { abort: expect.any(Function) });
-    expect(run).toHaveBeenCalledWith({ warm: true }, { abort: expect.any(Function) });
-    expect(look).toHaveBeenCalledWith({ ran: true }, { abort: expect.any(Function) });
-    expect(stretch).toHaveBeenCalledWith({ looked: true }, { abort: expect.any(Function) });
+    expect(warmup).toHaveBeenCalledWith({ actor: 'me' }, expect.objectContaining({ abort: expect.any(Function) }));
+    expect(run).toHaveBeenCalledWith({ warm: true }, expect.objectContaining({ abort: expect.any(Function) }));
+    expect(look).toHaveBeenCalledWith({ ran: true }, expect.objectContaining({ abort: expect.any(Function) }));
+    expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function) }));
   };
 
   const assertAbort = () => {
@@ -75,6 +75,19 @@ describe('Engine', () => {
       expect(data).toEqual({ stretched: true });
       expect(listener).toHaveBeenCalledTimes(5);
     });
+
+    test('abort listener', async () => {
+      const listener = jest.fn((step, context) => {
+        if (step === 4) context.abort();
+      });
+      await Action.compete().listen(listener);
+      expect(warmup).toHaveBeenCalled();
+      expect(run).toHaveBeenCalled();
+      expect(look).toHaveBeenCalled();
+      expect(stretch).not.toHaveBeenCalled();
+      // expect(data).toEqual({ stretched: true });
+      expect(listener).toHaveBeenCalledTimes(5);
+    });
   });
 
   describe('Stream', () => {
@@ -92,7 +105,7 @@ describe('Engine', () => {
     test('push', async () => {
       Stream.test.push(() => new Action('', abort)(1));
       await timeout(50);
-      expect(abort).toHaveBeenCalledWith(1, { abort: expect.any(Function) });
+      expect(abort).toHaveBeenCalledWith(1, expect.objectContaining({ abort: expect.any(Function) }));
     });
 
     test('abort', async () => {
