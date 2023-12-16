@@ -26,20 +26,8 @@ module.exports = class Action {
         reject(new AbortError('Action Aborted', data));
       };
 
-      // Pipeline step by step
-      pipeline(steps.map((step, index) => value => new Promise((res, rej) => {
-        setImmediate(async () => {
-          if (!aborted) {
-            if (!started) await Promise.all(listeners.map(l => l(0, context))); // Give a chance to abort before starting
-            started = true;
-            await Promise.all(listeners.map(l => l(index + 1, context))); // Give a chance to abort along with each step
-            Promise.race([promise, step(value, context)]).then(res).catch(rej);
-          }
-        });
-      })), startValue).then(resolve).catch(reject);
-
       // We decorate (and return) the promise with additional props
-      return Object.defineProperties(promise.catch((e) => {
+      context.promise = Object.defineProperties(promise.catch((e) => {
         if (!(e instanceof AbortError)) throw e;
         return e;
       }), {
@@ -68,6 +56,20 @@ module.exports = class Action {
           },
         },
       });
+
+      // Pipeline step by step
+      pipeline(steps.map((step, index) => value => new Promise((res, rej) => {
+        setImmediate(async () => {
+          if (!aborted) {
+            if (!started) await Promise.all(listeners.map(l => l(0, context))); // Give a chance to abort before starting
+            started = true;
+            await Promise.all(listeners.map(l => l(index + 1, context))); // Give a chance to abort along with each step
+            Promise.race([promise, step(value, context)]).then(res).catch(rej);
+          }
+        });
+      })), startValue).then(resolve).catch(reject);
+
+      return context.promise;
     };
   }
 
