@@ -46,6 +46,14 @@ describe('Engine', () => {
       expect(data).toEqual({ stretched: true });
     });
 
+    test('result', async () => {
+      const action = new Action('test', [
+        () => 1,
+        () => undefined,
+      ]);
+      expect(await action()).toBe(1);
+    });
+
     test('abort', async () => {
       const promise = Action.compete({ actor: 'you' });
       promise.abort('selfish');

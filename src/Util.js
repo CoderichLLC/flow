@@ -13,7 +13,7 @@ exports.pipeline = (thunks, startValue) => {
   return thunks.reduce((promise, thunk) => {
     return promise.then((value) => {
       if (value !== undefined) $value = value;
-      return Promise.resolve(thunk($value));
+      return Promise.resolve(thunk($value)).then((result = $value) => result);
     });
   }, Promise.resolve(startValue));
 };
