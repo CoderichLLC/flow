@@ -18,12 +18,13 @@ module.exports = class Actor extends EventEmitter {
     return promise;
   }
 
-  stream(stream, action, data) {
+  stream(stream, action, data, context = {}) {
     stream = stream instanceof Stream ? stream : Stream[stream];
+    context.stream = stream;
 
     return new Promise((resolve, reject) => {
       stream.push(() => {
-        const promise = this.perform(action, data, { stream });
+        const promise = this.perform(action, data, context);
         promise.then(resolve).catch(reject);
         return promise; // We must return promise because that has all the methods (ie. abort())
       });
