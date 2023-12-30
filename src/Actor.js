@@ -8,9 +8,10 @@ module.exports = class Actor extends EventEmitter {
     this.id = id;
   }
 
-  perform(action, data) {
+  perform(action, data, context = {}) {
+    context.actor = this;
     action = action instanceof Action ? action : Action[action];
-    const promise = action(data, { actor: this });
+    const promise = action(data, context);
     this.emit(`pre:${promise.id}`, { action, promise, data });
     promise.listen((i) => { if (i === 0) this.emit(`start:${promise.id}`, { action, promise, data }); });
     promise.then(result => this.emit(`post:${promise.id}`, { action, promise, result }));
@@ -22,7 +23,7 @@ module.exports = class Actor extends EventEmitter {
 
     return new Promise((resolve, reject) => {
       stream.push(() => {
-        const promise = this.perform(action, data);
+        const promise = this.perform(action, data, { stream });
         promise.then(resolve).catch(reject);
         return promise; // We must return promise because that has all the methods (ie. abort())
       });

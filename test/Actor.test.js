@@ -37,10 +37,10 @@ describe('Actor', () => {
   test('stream', async () => {
     const actor = Actor.player1;
     await actor.stream('player1', 'compete', { actor: 'hi' });
-    expect(warmup).toHaveBeenCalledWith({ actor: 'hi' }, expect.objectContaining({ abort: expect.any(Function), actor }));
-    expect(run).toHaveBeenCalledWith({ warm: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
-    expect(look).toHaveBeenCalledWith({ ran: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
-    expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
+    expect(warmup).toHaveBeenCalledWith({ actor: 'hi' }, expect.objectContaining({ abort: expect.any(Function), actor, stream: Stream.player1 }));
+    expect(run).toHaveBeenCalledWith({ warm: true }, expect.objectContaining({ abort: expect.any(Function), actor, stream: Stream.player1 }));
+    expect(look).toHaveBeenCalledWith({ ran: true }, expect.objectContaining({ abort: expect.any(Function), actor, stream: Stream.player1 }));
+    expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor, stream: Stream.player1 }));
   });
 
   test('events + follow', (done) => {
