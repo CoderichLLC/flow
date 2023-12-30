@@ -64,7 +64,11 @@ module.exports = class Action {
             if (!started) await Promise.all(listeners.map(l => l(0, context))); // Give a chance to abort before starting
             started = true;
             await Promise.all(listeners.map(l => l(index + 1, context))); // Give a chance to abort along with each step
-            Promise.race([promise, step(value, context)]).then(res).catch(rej);
+            const $step = step(value, context);
+            Promise.race([promise, $step]).then(res).catch(async (e) => {
+              await $step;
+              return rej(e);
+            });
           }
         });
       })), startValue).then(resolve).catch(reject);
