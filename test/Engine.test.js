@@ -38,6 +38,7 @@ describe('Engine', () => {
     test('define', () => {
       Action.define('compete', [warmup, run, look, stretch]);
       expect(Action.compete).toBeDefined();
+      expect(Action.compete instanceof Action).toBe(true);
     });
 
     test('parameters', async () => {

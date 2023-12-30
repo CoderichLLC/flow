@@ -9,7 +9,7 @@ module.exports = class Action {
   constructor(id, ...steps) {
     steps = steps.flat();
 
-    return (startValue, context = {}) => {
+    const action = (startValue, context = {}) => {
       // Instead of emitting events like crazy, we allow callback listeners
       const listeners = [];
 
@@ -71,6 +71,11 @@ module.exports = class Action {
 
       return context.promise;
     };
+
+    // We want this function to be an instanceof Action
+    Object.setPrototypeOf(action, Action.prototype);
+
+    return action;
   }
 
   static define(id, ...steps) {
