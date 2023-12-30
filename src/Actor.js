@@ -9,12 +9,13 @@ module.exports = class Actor extends EventEmitter {
   }
 
   perform(action, data, context = {}) {
-    context.actor = this;
     action = action instanceof Action ? action : Action[action];
+    context.actor = this;
+    context.action = action;
     const promise = action(data, context);
-    this.emit(`pre:${promise.id}`, { action, promise, data });
-    promise.listen((i) => { if (i === 0) this.emit(`start:${promise.id}`, { action, promise, data }); });
-    promise.then(result => this.emit(`post:${promise.id}`, { action, promise, result }));
+    this.emit(`pre:${promise.id}`, { data, ...context });
+    promise.listen((i) => { if (i === 0) this.emit(`start:${promise.id}`, { data, ...context }); });
+    promise.then(result => this.emit(`post:${promise.id}`, { result, ...context }));
     return promise;
   }
 
