@@ -5,6 +5,7 @@ module.exports = class Stream extends EventEmitter {
   #action;
   #flowing = false;
   #paused = false;
+  #closed = false;
 
   constructor(id, ...thunks) {
     super();
@@ -34,19 +35,31 @@ module.exports = class Stream extends EventEmitter {
     return this.#flow();
   }
 
+  close(reason) {
+    this.#closed = reason;
+    this.#emit('close');
+  }
+
+  open() {
+    this.#closed = false;
+    this.#emit('open');
+  }
+
   abort(...args) {
     this.#action?.abort(...args);
-    this.#emit('abort');
+    this.#emit('abort', this.#action);
     return this.clear();
   }
 
   push(...thunks) {
+    if (this.#closed !== false) return this.#reject(thunks.flat());
     this.#thunks.push(...thunks);
     this.#emit('add');
     return this.#flow();
   }
 
   unshift(...thunks) {
+    if (this.#closed !== false) return this.#reject(thunks.flat());
     this.#thunks.unshift(...thunks);
     this.#emit('add');
     return this.#flow();
@@ -54,6 +67,11 @@ module.exports = class Stream extends EventEmitter {
 
   #emit(name) {
     this.emit(name, { action: this.#action });
+  }
+
+  #reject(thunks) {
+    thunks.forEach(thunk => thunk().abort(this.#closed));
+    return this;
   }
 
   async #flow() {

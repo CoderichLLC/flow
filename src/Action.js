@@ -14,22 +14,21 @@ module.exports = class Action {
       const listeners = [];
 
       // Internal state
-      let started = false, aborted = false, reason, paused, currentStep;
+      let started = false, aborted = false, reason, paused;
 
       // The action is a promise that is resolved or rejected
       const { promise, resolve, reject } = withResolvers();
 
       // Method to abort the action
-      context.abort = (message, forceful = false) => {
+      context.abort = (message) => {
         aborted = true;
         reason = message;
-        reject(new AbortError('Action Aborted', { message, forceful }));
+        reject(new AbortError('Action Aborted', { message }));
       };
 
       // We decorate (and return) the promise with additional props
       context.promise = Object.defineProperties(promise.catch(async (e) => {
         if (!(e instanceof AbortError)) throw e;
-        if (!e.data?.forceful) await currentStep;
         return e;
       }), {
         id: { value: id },
@@ -62,12 +61,16 @@ module.exports = class Action {
       pipeline(steps.map((step, index) => value => new Promise((res, rej) => {
         setImmediate(async () => {
           if (!aborted) {
-            if (!started) await Promise.all(listeners.map(l => l(0, context))); // Give a chance to abort before starting
-            started = true;
-            await Promise.all(listeners.map(l => l(index + 1, context))); // Give a chance to abort along with each step
+            // We use listener index 0 to indicate the very start of the action
+            if (index === 0) await Promise.all(listeners.map(l => l(index, context)));
+
+            // Here we call with the step index
+            if (!aborted) await Promise.all(listeners.map(l => l(index + 1, context)));
+
+            // Here we race the actual step vs the ability to abort it
             if (!aborted) {
-              currentStep = step(value, context);
-              Promise.race([promise, currentStep]).then(res).catch(rej);
+              started = true;
+              Promise.race([promise, step(value, context)]).then(res).catch(rej);
             }
           }
         });
