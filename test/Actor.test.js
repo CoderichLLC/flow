@@ -44,7 +44,7 @@ describe('Actor', () => {
   });
 
   test('events + follow', (done) => {
-    Actor.player1.once('start:compete', async ({ promise }) => {
+    Actor.player1.once('pre:compete', async ({ promise }) => {
       const actor = new Actor();
       await actor.follow(promise);
       expect(warmup).toHaveBeenCalledTimes(2);

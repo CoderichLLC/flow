@@ -14,7 +14,7 @@ module.exports = class Actor extends EventEmitter {
     context.action = action;
     const promise = action(data, context);
     this.emit(`pre:${promise.id}`, { data, ...context });
-    promise.listen((i) => { if (i === 0) this.emit(`start:${promise.id}`, { data, ...context }); });
+    promise.listen((step) => { if (step === 1) setImmediate(() => this.emit(`start:${promise.id}`, { data, ...context })); });
     promise.then(result => this.emit(`post:${promise.id}`, { result, ...context }));
     return promise;
   }
@@ -41,12 +41,12 @@ module.exports = class Actor extends EventEmitter {
     const sourceSteps = Array.from(new Array(sourcePromise.steps)).map((_, index) => {
       return new Promise((resolve) => {
         sourcePromise.then(() => { if (sourcePromise.aborted) abort(); }).catch(abort);
-        sourcePromise.listen((i) => { if (i === index + 1) resolve(); }); // our 0 index should be i = 1
+        sourcePromise.listen((step) => { if (step === index + 1) resolve(); });
       });
     });
 
     // Delay execution until the source step is finished
-    return (promise = this.perform(sourcePromise.id, data).listen(i => sourceSteps[i - 1])); // Skip the "start" step
+    return (promise = this.perform(sourcePromise.id, data).listen(step => sourceSteps[step - 1]));
   }
 
   static define(id) {

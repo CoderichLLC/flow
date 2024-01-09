@@ -82,7 +82,7 @@ describe('Engine', () => {
       const listener = jest.fn(() => {});
       const data = await Action.compete().listen(listener);
       expect(data).toEqual({ stretched: true });
-      expect(listener).toHaveBeenCalledTimes(5);
+      expect(listener).toHaveBeenCalledTimes(4);
     });
 
     test('abort listener', async () => {
@@ -95,7 +95,7 @@ describe('Engine', () => {
       expect(look).toHaveBeenCalled();
       expect(stretch).not.toHaveBeenCalled();
       // expect(data).toEqual({ stretched: true });
-      expect(listener).toHaveBeenCalledTimes(5);
+      expect(listener).toHaveBeenCalledTimes(4);
     });
   });
 
