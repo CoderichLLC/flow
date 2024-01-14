@@ -18,7 +18,7 @@ module.exports = class Actor extends EventEmitter {
     promise.listen((step) => { if (step === 1) setImmediate(() => this.emit(`start:${promise.id}`, { data, ...context })); });
     promise.then((result) => {
       const type = result instanceof AbortError ? 'abort' : 'post';
-      this.emit(`${type}:${promise.id}`, { result, ...context });
+      this.emit(`${type}:${promise.id}`, { data, result, ...context });
     });
     return promise;
   }
@@ -39,18 +39,20 @@ module.exports = class Actor extends EventEmitter {
   follow(sourcePromise, data) {
     let promise;
 
-    const abort = () => promise.abort();
+    const abort = reason => promise.abort(reason);
 
     // Follow the source steps
     const sourceSteps = Array.from(new Array(sourcePromise.steps)).map((_, index) => {
       return new Promise((resolve) => {
-        sourcePromise.then(() => { if (sourcePromise.aborted) abort(); }).catch(abort);
+        sourcePromise.then(() => { if (sourcePromise.aborted) abort('$source'); }).catch(abort);
         sourcePromise.listen((step) => { if (step === index + 1) resolve(); });
       });
     });
 
     // Delay execution until the source step is finished
-    return (promise = this.perform(sourcePromise.id, data).listen(step => sourceSteps[step - 1]));
+    promise = this.perform(sourcePromise.id, data).listen(step => sourceSteps[step - 1]);
+    promise.$follow = true;
+    return promise;
   }
 
   static define(id) {
