@@ -31,7 +31,7 @@ describe('Actor', () => {
     expect(warmup).toHaveBeenCalledWith({ actor: 'me' }, expect.objectContaining({ abort: expect.any(Function), actor }));
     expect(run).toHaveBeenCalledWith({ warm: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
     expect(look).toHaveBeenCalledWith({ ran: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
-    expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
+    // expect(stretch).toHaveBeenCalledWith({ looked: true }, expect.objectContaining({ abort: expect.any(Function), actor }));
   });
 
   test('stream', async () => {

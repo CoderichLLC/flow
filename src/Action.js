@@ -1,3 +1,4 @@
+const Step = require('./Step');
 const { AbortError } = require('./Error');
 const { withResolvers, pipeline } = require('./Util');
 
@@ -14,7 +15,7 @@ module.exports = class Action {
       const listeners = [];
 
       // Internal state
-      let started = false, aborted = false, reason, paused;
+      let started = false, aborted = false, reason, paused, currentProcess;
 
       // The action is a promise that is resolved or rejected
       const { promise, resolve, reject } = withResolvers();
@@ -29,6 +30,7 @@ module.exports = class Action {
       // We decorate (and return) the promise with additional props
       context.promise = Object.defineProperties(promise.catch(async (e) => {
         if (!(e instanceof AbortError)) throw e;
+        if (currentProcess?.isStep) await currentProcess;
         return e;
       }), {
         id: { value: id },
@@ -67,7 +69,11 @@ module.exports = class Action {
             await Promise.all(listeners.map(l => l(index + 1, context)));
 
             // Here we race the actual step vs the ability to abort it
-            if (!aborted) Promise.race([promise, step(value, context)]).then(res).catch(rej);
+            if (!aborted) {
+              currentProcess = Promise.resolve(step(value, context));
+              currentProcess.isStep = step instanceof Step;
+              Promise.race([promise, currentProcess]).then(res).catch(rej);
+            }
           }
         });
       })), startValue).then(resolve).catch(reject);
