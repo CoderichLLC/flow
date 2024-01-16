@@ -15,7 +15,7 @@ module.exports = class Actor extends EventEmitter {
     context.action = action;
     const promise = action(data, context);
     this.emit(`pre:${promise.id}`, { data, ...context });
-    promise.listen((step) => { if (step === 1) setImmediate(() => this.emit(`start:${promise.id}`, { data, ...context })); });
+    promise.listen((step) => { if (step === 1) this.emit(`start:${promise.id}`, { data, ...context }); });
     promise.then((result) => {
       const type = result instanceof AbortError ? 'abort' : 'post';
       this.emit(`${type}:${promise.id}`, { data, result, ...context });

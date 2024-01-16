@@ -78,6 +78,7 @@ module.exports = class Stream extends EventEmitter {
     if (!this.#flowing && !this.#paused && this.#thunks.length) {
       this.#flowing = true;
       this.#action = this.#thunks.shift()(); // The thunk becomes an action!
+      this.#emit('flow');
       await this.#action;
       this.#flowing = false;
       this.#flow();

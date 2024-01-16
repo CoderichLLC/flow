@@ -25,6 +25,7 @@ module.exports = class Action {
         aborted = true;
         reason = message;
         reject(new AbortError('Action Aborted', { message }));
+        context.child?.abort();
       };
 
       // We decorate (and return) the promise with additional props
@@ -70,9 +71,13 @@ module.exports = class Action {
 
             // Here we race the actual step vs the ability to abort it
             if (!aborted) {
-              currentProcess = Promise.resolve(step(value, context));
-              currentProcess.isStep = step instanceof Step;
-              Promise.race([promise, currentProcess]).then(res).catch(rej);
+              try {
+                currentProcess = Promise.resolve(step(value, context));
+                currentProcess.isStep = step instanceof Step;
+                Promise.race([promise, currentProcess]).then(res).catch(rej);
+              } catch (e) {
+                rej(e);
+              }
             }
           }
         });
