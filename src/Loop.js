@@ -5,15 +5,20 @@ module.exports = class Loop {
   constructor(...steps) {
     const action = new Action('loop', steps.flat());
 
-    const proxy = (data, context = {}) => {
-      const promise = action(data, { ...context });
-      context.child = promise;
+    return (data, context = {}) => {
+      let promise;
 
-      return promise.then((result) => {
-        return result instanceof AbortError ? result : proxy(result, context);
-      });
+      const loop = () => {
+        promise = action(data, context);
+        return promise.then((result) => {
+          return result instanceof AbortError ? context.abort(result) : loop();
+        });
+      };
+
+      // If the parent is aborted, abort the current promise
+      context.promise.onAbort(reason => promise.abort(reason));
+
+      return loop();
     };
-
-    return proxy;
   }
 };

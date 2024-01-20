@@ -26,7 +26,6 @@ module.exports = class Action {
         aborted = true;
         reason = message;
         reject(new AbortError('Action Aborted', { message }));
-        context.child?.abort();
         onAbort?.();
       };
 
