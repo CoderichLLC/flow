@@ -13,9 +13,10 @@ module.exports = class Action {
     const action = (startValue, context = {}) => {
       // Instead of emitting events like crazy, we allow callback listeners
       const listeners = [];
+      const startListeners = [];
 
       // Internal state
-      let started = false, aborted = false, reason, paused, currentProcess;
+      let started = false, aborted = false, reason, paused, currentProcess, onAbort;
 
       // The action is a promise that is resolved or rejected
       const { promise, resolve, reject } = withResolvers();
@@ -26,6 +27,7 @@ module.exports = class Action {
         reason = message;
         reject(new AbortError('Action Aborted', { message }));
         context.child?.abort();
+        onAbort?.();
       };
 
       // We decorate (and return) the promise with additional props
@@ -41,6 +43,8 @@ module.exports = class Action {
         aborted: { get: () => aborted },
         started: { get: () => started },
         reason: { get: () => reason },
+        onStart: { get() { return fn => startListeners.push(fn) && this; } },
+        onAbort: { value: (fn) => { onAbort = fn; } },
         pause: {
           get() {
             return () => {
@@ -64,14 +68,14 @@ module.exports = class Action {
       pipeline(steps.map((step, index) => value => new Promise((res, rej) => {
         setImmediate(async () => {
           if (!aborted) {
-            started = true;
-
             // Here we call with the step index
             await Promise.all(listeners.map(l => l(index + 1, context)));
 
             // Here we race the actual step vs the ability to abort it
             if (!aborted) {
               try {
+                if (!started) startListeners.forEach(l => l());
+                started = true;
                 currentProcess = Promise.resolve(step(value, context));
                 currentProcess.isStep = step instanceof Step;
                 Promise.race([promise, currentProcess]).then(res).catch(rej);

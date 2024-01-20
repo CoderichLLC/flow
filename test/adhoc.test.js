@@ -1,6 +1,5 @@
 const Actor = require('../src/Actor');
 const Action = require('../src/Action');
-// const Stream = require('../src/Stream');
 const { timeout } = require('../src/Util');
 
 let counter = 0;
@@ -29,5 +28,23 @@ describe('adhoc', () => {
     await actor.perform('one');
     expect(post).toHaveBeenCalledTimes(0);
     expect(abort).toHaveBeenCalledTimes(2);
+  });
+
+  test('abort pre never runs step 1', async () => {
+    const spy = jest.fn();
+    const action = new Action('idk', () => spy());
+    const actor = new Actor();
+    actor.on('pre:idk', ({ abort }) => abort());
+    await actor.perform(action);
+    expect(spy).toHaveBeenCalledTimes(0);
+  });
+
+  test('abort start runs step 1', async () => {
+    const spy = jest.fn();
+    const action = new Action('idk', () => spy());
+    const actor = new Actor();
+    actor.on('start:idk', ({ abort }) => abort());
+    await actor.perform(action);
+    expect(spy).toHaveBeenCalledTimes(1);
   });
 });
