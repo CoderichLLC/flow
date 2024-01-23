@@ -16,7 +16,7 @@ module.exports = class Loop {
       };
 
       // If the parent is aborted, abort the current promise
-      context.promise.onAbort(reason => promise.abort(reason));
+      context.promise?.onAbort(reason => promise.abort(reason));
 
       return loop();
     };
